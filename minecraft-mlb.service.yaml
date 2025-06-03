@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: diggydig-mc-metallb
+    namespace: minecraft
+spec:
+    selector:
+        app: diggydig-mc-minecraft
+    ports:
+        - port: 30100
+          targetPort: 30100
+    type: LoadBalancer
+
+## k apply -f ./minecraft-mlb.service.yaml --namespace=minecraft
