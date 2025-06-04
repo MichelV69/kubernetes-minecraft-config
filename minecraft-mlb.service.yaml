@@ -7,8 +7,12 @@ spec:
     selector:
         app: diggydig-mc-minecraft
     ports:
-        - port: 30100
-          targetPort: 30100
+      - name: game
+        port: 25565
+        targetPort: 25565
+        protocol: TCP
+      - name: rcon
+        port: 25575
+        targetPort: 25575
+        protocol: TCP
     type: LoadBalancer
-
-## k apply -f ./minecraft-mlb.service.yaml --namespace=minecraft
