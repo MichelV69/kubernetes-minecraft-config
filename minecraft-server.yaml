@@ -1,24 +1,67 @@
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: server
+  namespace: minecraft
+  labels: 
+    app:  server
+spec:
+  selector:
+    app: server               # name of Pod we want to talk to
+  type: LoadBalancer          # request external IP / routing
+  ports:
+    - name: game
+      protocol: TCP           
+      port: 25565             # port exposed to Cluster
+      targetPort: 25565       # matches 'containerPort'
+      nodePort: 30565         # the external IP address port to connect on  
+    - name: console
+      protocol: TCP           
+      port: 25575             # port exposed to Cluster
+      targetPort: 25575       # matches 'containerPort'
+      nodePort: 30575         # the external IP address port to connect on  
+    - name: metrics
+      protocol: TCP           
+      port: 19565             # port exposed to Cluster
+      targetPort: 19565       # matches 'containerPort'
+      nodePort: 30585         # the external IP address port to connect on
+
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: minecraft-server
+  name: server
   namespace: minecraft
 spec:
   selector:
     matchLabels:
-      app: minecraft-server
+      app: server
+  serviceName: "server"
+  replicas: 1
+# ---------  
   template:
     metadata:
       labels:
          environment: production
-         app: minecraft-server
+         app: server
     spec:
       containers:
-        - name: minecraft-server
+        - name: server
           image: itzg/minecraft-server:latest  # Or specific version if needed
           env:
+          - name: OVERRIDE_SERVER_PROPERTIES
+            value: "FALSE"
           - name: EULA
             value: "TRUE"
+          - name: ENABLE_AUTOSTOP
+            value: "FALSE"
+          - name: ENABLE_AUTOPAUSE
+            value: "FALSE"
+          - name: AUTOPAUSE_TIMEOUT_INIT
+            value: "7200"
+          - name: AUTOPAUSE_TIMEOUT_EST
+            value: "7200"
           - name: MODE
             value: "survival"
           - name: TYPE
@@ -70,13 +113,17 @@ spec:
               secretKeyRef: 
                 name: minecraft-secret
                 key: worldSaveName
+          volumeMounts:
+          - mountPath: /data
+            name: mc-data-vol
+#            subPath: minecraft
 # ---------------------          
           ports:
-            - name: mc-server
+            - name: game
               containerPort: 25565  # Expose port 25565 to Service
-            - name: mc-rcon
+            - name: console
               containerPort: 25575  # Expose port 25575 to Service
-            - name: mc-metrics
+            - name: metrics
               containerPort: 19565  # Expose port 19565 to Service
           resources:
             requests:
@@ -85,31 +132,32 @@ spec:
             limits:
               cpu: 2  # Adjust based on expected workload
               memory: "6Gi"  # Adjust based on expected workload
-          readinessProbe:
-              exec:
-                command:
-                - mcstatus
-                - 127.0.0.1
-                - ping
-              initialDelaySeconds: 30
-              periodSeconds: 30
-          livenessProbe:
-            exec:
-              command:
-              - mcstatus
-              - 127.0.0.1
-              - ping
-            initialDelaySeconds: 30
-            periodSeconds: 30
+ #         readinessProbe:
+ #             exec:
+ #               command:
+ #               - mcstatus
+ #               - 127.0.0.1
+ #               - ping
+ #             initialDelaySeconds: 30
+ #             periodSeconds: 30
+ #         livenessProbe:
+ #           exec:
+ #             command:
+ #             - mcstatus
+ #             - 127.0.0.1
+ #             - ping
+ #           initialDelaySeconds: 30
+ #           periodSeconds: 30
+# ---------------------
       volumes:
-        - name: minecraft-data-vc
+        - name: mc-data-vol
           persistentVolumeClaim:
-            claimName: minecraft-data
+            claimName: nfs-mount
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: minecraft-data
+  name: nfs-mount
 spec:
   storageClassName: nfs-client
   volumeMode: Filesystem
@@ -118,29 +166,4 @@ spec:
   resources:
     requests:
       storage: 11Gi
----
-apiVersion: v1
-kind: Service
-metadata: 
-  name: minecraft-service
-  namespace: minecraft
-spec:
-  selector:
-    app: minecraft-server   # name of Pod we want to talk to
-  type: LoadBalancer          # request external IP / routing
-  ports:
-    - name: game-service
-      protocol: TCP           
-      port: 25565             # port exposed to Cluster
-      targetPort: mc-server       # matches 'containerPort'
-      nodePort: 30565         # the external IP address port to connect on  
-    - name: game-console
-      protocol: TCP           
-      port: 25575             # port exposed to Cluster
-      targetPort: mc-rcon       # matches 'containerPort'
-      nodePort: 30575         # the external IP address port to connect on  
-    - name: server-metrics
-      protocol: TCP           
-      port: 19565             # port exposed to Cluster
-      targetPort: mc-metrics       # matches 'containerPort'
-      nodePort: 30585         # the external IP address port to connect on
+# ---
