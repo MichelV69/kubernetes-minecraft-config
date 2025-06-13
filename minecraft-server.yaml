@@ -17,23 +17,60 @@ spec:
         - name: minecraft-server
           image: itzg/minecraft-server:latest  # Or specific version if needed
           env:
-            - name: EULA
-              value: "TRUE"
-            - name: MODE
-              value: "survival"
-            - name: TYPE
-              value: "VANILLA"
-            - name: INIT_MEMORY
-              value: 2G
-            - name: MAX_MEMORY
-              value: 4G
-            - name: ALLOW_FLIGHT
-              value: "FALSE"
-            - name: RCON_PASSWORD
-              valueFrom:
-                secretKeyRef: 
-                  name: minecraft-secret
-                  key: rcon-pass
+          - name: EULA
+            value: "TRUE"
+          - name: MODE
+            value: "survival"
+          - name: TYPE
+            value: "VANILLA"
+          - name: INIT_MEMORY
+            value: 2G
+          - name: MAX_MEMORY
+            value: 4G
+          - name: ALLOW_FLIGHT
+            value: "FALSE"
+          - name: RCON_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: minecraft-secret
+                key: rcon-pass
+          - name: MOTD
+            value: "Welcome To\n §l§cDiggyDig II§r \nMinecraft Server"
+          - name: DIFFICULTY
+            value: "normal"
+          - name: MAX_PLAYERS
+            value: "11"
+          - name: MAX_WORLD_SIZE
+            value: "11111"
+          - name: ALLOW_NETHER
+            value: "TRUE"
+          - name: ANNOUNCE_PLAYER_ACHIEVEMENTS
+            value: "TRUE"
+          - name: FORCE_GAMEMODE
+            value: "TRUE"
+          - name: GENERATE_STRUCTURES
+            value: "TRUE"
+          - name: SPAWN_ANIMALS
+            value: "TRUE"
+          - name: SPAWN_MONSTERS
+            value: "TRUE"
+          - name: SPAWN_NPCS
+            value: "TRUE"
+          - name: VIEW_DISTANCE
+            value: "11"
+          - name: PVP
+            value: "false"
+          - name: SEED
+            valueFrom:
+              secretKeyRef: 
+                name: minecraft-secret
+                key: levelSeed
+          - name: SERVER_NAME
+            valueFrom:
+              secretKeyRef: 
+                name: minecraft-secret
+                key: worldSaveName
+# ---------------------          
           ports:
             - name: mc-server
               containerPort: 25565  # Expose port 25565 to Service
@@ -74,7 +111,7 @@ apiVersion: v1
 metadata:
   name: minecraft-data
 spec:
-  storageClassName: nfs-client.wolfstar
+  storageClassName: nfs-client
   volumeMode: Filesystem
   accessModes:
   - ReadWriteOnce
