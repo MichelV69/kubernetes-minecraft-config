@@ -35,11 +35,11 @@ spec:
                   name: minecraft-secret
                   key: rcon-pass
           ports:
-            - name: minecraft
+            - name: mc-server
               containerPort: 25565  # Expose port 25565 to Service
-            - name: minecraft-rcon
+            - name: mc-rcon
               containerPort: 25575  # Expose port 25575 to Service
-            - name: metrics
+            - name: mc-metrics
               containerPort: 19565  # Expose port 19565 to Service
           resources:
             requests:
@@ -92,15 +92,18 @@ spec:
     app: minecraft-server   # name of Pod we want to talk to
   type: LoadBalancer          # request external IP / routing
   ports:
-    - protocol: TCP             # -> game
+    - name: game-service
+      protocol: TCP           
       port: 25565             # port exposed to Cluster
-      targetPort: 25565       # matches 'containerPort'
+      targetPort: mc-server       # matches 'containerPort'
       nodePort: 30565         # the external IP address port to connect on  
-    - protocol: TCP             # -> rcon
+    - name: game-console
+      protocol: TCP           
       port: 25575             # port exposed to Cluster
-      targetPort: 25575       # matches 'containerPort'
+      targetPort: mc-rcon       # matches 'containerPort'
       nodePort: 30575         # the external IP address port to connect on  
-    - protocol: TCP             # -> metrics
+    - name: server-metrics
+      protocol: TCP           
       port: 19565             # port exposed to Cluster
-      targetPort: 19565       # matches 'containerPort'
+      targetPort: mc-metrics       # matches 'containerPort'
       nodePort: 30585         # the external IP address port to connect on
