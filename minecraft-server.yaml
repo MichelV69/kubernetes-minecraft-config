@@ -10,7 +10,8 @@ spec:
   template:
     metadata:
       labels:
-        app: minecraft-server
+         environment: production
+         app: minecraft-server
     spec:
       containers:
         - name: minecraft-server
@@ -34,9 +35,9 @@ spec:
             - name: minecraft
               containerPort: 25565  # Expose port 25565
             - name: minecraft-rcon
-              containerPort: 25575
+              containerPort: 25575  # Expose port 25575
             - name: metrics
-              containerPort: 19565
+              containerPort: 19565  # Expose port 19565
 
           resources:
             requests:
@@ -74,4 +75,4 @@ spec:
                     - ReadWriteMany
                 resources:
                     requests:
-                    storage: 1Mi
+                    storage: 111Gi

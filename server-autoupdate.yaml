@@ -2,7 +2,7 @@
 apiVersion: upgrade.cattle.io/v1
 kind: Plan
 metadata:
-  name: server-plan
+  name: server-autoupdate
   namespace: system-upgrade
 spec:
   concurrency: 1
@@ -18,4 +18,4 @@ spec:
     image: rancher/k3s-upgrade
   channel: https://update.k3s.io/v1-release/channels/v1.31
 #
-# kubectl apply -f server-plan.yaml
+# kubectl apply -f server-autoupdate.yaml
