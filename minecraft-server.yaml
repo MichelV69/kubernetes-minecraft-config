@@ -31,8 +31,9 @@ spec:
               value: "FALSE"
             - name: RCON_PASSWORD
               valueFrom:
-                secretKeyRef: minecraft-secret
-                 name: rcon-pass
+                secretKeyRef: 
+                  name: minecraft-secret
+                  key: rcon-pass
           ports:
             - name: minecraft
               containerPort: 25565  # Expose port 25565 to Service
@@ -40,7 +41,6 @@ spec:
               containerPort: 25575  # Expose port 25575 to Service
             - name: metrics
               containerPort: 19565  # Expose port 19565 to Service
-
           resources:
             requests:
               cpu: 1  # Adjust based on expected workload
@@ -64,40 +64,43 @@ spec:
               - ping
             initialDelaySeconds: 30
             periodSeconds: 30
-          volumeMounts:
-          - name: minecraft-data
-            mountPath: /data
       volumes:
-        - name: minecraft-data
+        - name: minecraft-data-vc
           persistentVolumeClaim:
             claimName: minecraft-data
-            spec:
-                storageClassName: nfs-client.wolfstar
-                accessModes:
-                    - ReadWriteMany
-                resources:
-                    requests:
-                    storage: 11Gi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: minecraft-data
+spec:
+  storageClassName: nfs-client.wolfstar
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 11Gi
 ---
 apiVersion: v1
 kind: Service
 metadata: 
-	name: minecraft-service
-	namespace: minecraft
+  name: minecraft-service
+  namespace: minecraft
 spec:
-	selector:
-		app: minecraft-server   # name of Pod we want to talk to
-	type: LoadBalancer          # request external IP / routing
-	ports:
-		- protocol: TCP             # -> game
-			port: 25565             # port exposed to Cluster
-			targetPort: 25565       # matches 'containerPort'
-			nodePort: 30565         # the external IP address port to connect on	
-		- protocol: TCP             # -> rcon
-			port: 25575             # port exposed to Cluster
-			targetPort: 25575       # matches 'containerPort'
-			nodePort: 30575         # the external IP address port to connect on	
-		- protocol: TCP             # -> metrics
-			port: 19565             # port exposed to Cluster
-			targetPort: 19565       # matches 'containerPort'
-			nodePort: 30585         # the external IP address port to connect on
+  selector:
+    app: minecraft-server   # name of Pod we want to talk to
+  type: LoadBalancer          # request external IP / routing
+  ports:
+    - protocol: TCP             # -> game
+      port: 25565             # port exposed to Cluster
+      targetPort: 25565       # matches 'containerPort'
+      nodePort: 30565         # the external IP address port to connect on  
+    - protocol: TCP             # -> rcon
+      port: 25575             # port exposed to Cluster
+      targetPort: 25575       # matches 'containerPort'
+      nodePort: 30575         # the external IP address port to connect on  
+    - protocol: TCP             # -> metrics
+      port: 19565             # port exposed to Cluster
+      targetPort: 19565       # matches 'containerPort'
+      nodePort: 30585         # the external IP address port to connect on
