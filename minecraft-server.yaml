@@ -65,7 +65,10 @@ spec:
           - name: MODE
             value: "survival"
           - name: TYPE
-            value: "VANILLA"
+            value: "CURSEFORGE"
+#            value: "VANILLA"
+          - name: CF_SERVER_MOD
+            value: "/modpacks/your-modpack.zip"
           - name: INIT_MEMORY
             value: 2G
           - name: MAX_MEMORY
@@ -153,17 +156,4 @@ spec:
         - name: mc-data-vol
           persistentVolumeClaim:
             claimName: nfs-mount
----
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: nfs-mount
-spec:
-  storageClassName: nfs-client
-  volumeMode: Filesystem
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 11Gi
 # ---
