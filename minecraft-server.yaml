@@ -87,8 +87,8 @@ spec:
           - name: DIFFICULTY
             value: "normal"
           - name: MAX_PLAYERS
-            value: "11"
           - name: MAX_WORLD_SIZE
+            value: "11"
             value: "11111"
           - name: ALLOW_NETHER
             value: "TRUE"
@@ -121,7 +121,6 @@ spec:
           volumeMounts:
           - mountPath: /data
             name: mc-data-vol
-#            subPath: minecraft
 # ---------------------          
           ports:
             - name: game
